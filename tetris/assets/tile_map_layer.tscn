@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=4 uid="uid://co0esc44sys74"]
+
+[ext_resource type="Texture2D" uid="uid://c1mi0d78lbjlx" path="res://scenes/tetrominoes.png" id="1_6k4f3"]
+[ext_resource type="Script" uid="uid://bn8eunvm6g2ac" path="res://assets/tile_map_layer.gd" id="1_a28a1"]
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_dpo1k"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6k4f3"]
+texture = ExtResource("1_6k4f3")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+6:0/0 = 0
+7:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_6k4f3"]
+tile_size = Vector2i(32, 32)
+physics_layer_0/collision_layer = 1
+sources/1 = SubResource("TileSetAtlasSource_6k4f3")
+
+[node name="TileMapLayer" type="TileMapLayer"]
+material = SubResource("CanvasItemMaterial_dpo1k")
+position = Vector2(1222, 1041)
+scale = Vector2(32, 32)
+tile_map_data = PackedByteArray("AAD/////AQAHAAAAAAD//wAAAQAHAAAAAAD//wEAAQAHAAAAAAD//wIAAQAHAAAAAAD//wMAAQAHAAAAAAD//wQAAQAHAAAAAAD//wUAAQAHAAAAAAD//wYAAQAHAAAAAAD//wcAAQAHAAAAAAD//wgAAQAHAAAAAAD//wkAAQAHAAAAAAD//woAAQAHAAAAAAD//wsAAQAHAAAAAAD//wwAAQAHAAAAAAD//w0AAQAHAAAAAAD//w4AAQAHAAAAAAD//w8AAQAHAAAAAAD//xAAAQAHAAAAAAD//xEAAQAHAAAAAAD//xIAAQAHAAAAAAD//xMAAQAHAAAAAAD//xQAAQAHAAAAAAAAAP//AQAHAAAAAAAAABQAAQAHAAAAAAABAP//AQAHAAAAAAABABQAAQAHAAAAAAACAP//AQAHAAAAAAACABQAAQAHAAAAAAADAP//AQAHAAAAAAADABQAAQAHAAAAAAAEAP//AQAHAAAAAAAEABQAAQAHAAAAAAAFAP//AQAHAAAAAAAFABQAAQAHAAAAAAAGAP//AQAHAAAAAAAGABQAAQAHAAAAAAAHAP//AQAHAAAAAAAHABQAAQAHAAAAAAAIAP//AQAHAAAAAAAIABQAAQAHAAAAAAAJAP//AQAHAAAAAAAJABQAAQAHAAAAAAAKAP//AQAHAAAAAAAKAAAAAQAHAAAAAAAKAAEAAQAHAAAAAAAKAAIAAQAHAAAAAAAKAAMAAQAHAAAAAAAKAAQAAQAHAAAAAAAKAAUAAQAHAAAAAAAKAAYAAQAHAAAAAAAKAAcAAQAHAAAAAAAKAAgAAQAHAAAAAAAKAAkAAQAHAAAAAAAKAAoAAQAHAAAAAAAKAAsAAQAHAAAAAAAKAAwAAQAHAAAAAAAKAA0AAQAHAAAAAAAKAA4AAQAHAAAAAAAKAA8AAQAHAAAAAAAKABAAAQAHAAAAAAAKABEAAQAHAAAAAAAKABIAAQAHAAAAAAAKABMAAQAHAAAAAAAKABQAAQAHAAAAAAA=")
+tile_set = SubResource("TileSet_6k4f3")
+rendering_quadrant_size = 32
+physics_quadrant_size = 32
+navigation_enabled = false
+script = ExtResource("1_a28a1")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(163.78125, 313.125)
+zoom = Vector2(0.03, 0.03)
