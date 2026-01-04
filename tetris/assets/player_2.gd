@@ -1,7 +1,7 @@
 extends TileMapLayer
 
 # ==========================================
-# 1. 資料區 (Data)
+# 1. 資料區 (Data) - 保持不變
 # ==========================================
 # I 方塊
 var i_0 = [Vector2i(0,1), Vector2i(1,1), Vector2i(2,1), Vector2i(3,1)]
@@ -77,22 +77,27 @@ var kick_table_i = {
 # ==========================================
 # 2. 遊戲變數 (Variables)
 # ==========================================
-var source_id = 1             # 本體 ID (通常是有顏色的)
-var ghost_source_id = 0       # 幽靈 ID (你的需求：Source ID 0)
-# 這裡設定幽靈的圖塊座標，請確保你的 Source 0 這格有圖
-var ghost_atlas_coords = Vector2i(7, 0) 
+# ★★★ Player 2 偏移量設定 ★★★
+const OFFSET_X = 20
+
+var source_id = 1
+var ghost_source_id = 0
+var ghost_atlas_coords = Vector2i(7, 0)
 
 var block_bag = []
 
 var shape_index: int = 0
 var shape_dir: int = 0
-var current_pos = Vector2i(4, 0)
-var current_ghost_pos = Vector2i(4, 0) # 紀錄幽靈位置
+
+# 初始位置偏移
+var current_pos = Vector2i(4 + OFFSET_X, 0)
+var current_ghost_pos = Vector2i(4 + OFFSET_X, 0)
 
 var lock_counter: int = 0
 const lock_count: int = 60
 
-var hold_pos = Vector2i(12,1)
+# Hold 位置偏移 (原12 -> 32)
+var hold_pos = Vector2i(12 + OFFSET_X, 1)
 var hold_shape:int = -1
 var hold_enable = true
 
@@ -120,20 +125,21 @@ func _physics_process(delta: float) -> void:
 
 
 func game_over():
-	if get_cell_source_id(Vector2i(4,-1)) != -1 || get_cell_source_id(Vector2i(5,-1)) != -1:
+	# 檢查生成點是否被擋住 (加上 OFFSET_X)
+	if get_cell_source_id(Vector2i(4 + OFFSET_X, -1)) != -1 || get_cell_source_id(Vector2i(5 + OFFSET_X, -1)) != -1:
 		print("遊戲結束！")
-		set_physics_process(false) # 這行最重要！它會讓 _physics_process 停止運作，方塊就不會再掉了
+		set_physics_process(false) 
 	
-	# 如果你想要直接重新開始，可以用這行 (把下面註解打開)
 	# get_tree().reload_current_scene()
+
 func spawn_block():
 	game_over()
 	shape_index = bag_randomnizer()
 	shape_dir = 0
-	current_pos = Vector2i(4, -2)
+	# 生成位置偏移
+	current_pos = Vector2i(4 + OFFSET_X, -2)
 	last_actual_op = Action.NONE
 	
-	# 繪圖順序：先算幽靈 -> 再畫本體
 	update_ghost()
 	set_block(current_piece, current_pos, source_id)
 
@@ -141,9 +147,9 @@ func clear_line():
 	var i = 19
 	while i >= -1:
 		var is_full = true
-		for j in range(10):
+		# 掃描 X=20 到 X=29
+		for j in range(OFFSET_X, 10 + OFFSET_X):
 			var _id = get_cell_source_id(Vector2i(j, i))
-			# 只要是 空(-1) 或是 幽靈(0)，就算沒滿
 			if _id == -1 or _id == ghost_source_id:
 				is_full = false
 				break
@@ -155,14 +161,14 @@ func clear_line():
 			i -= 1
 
 func move_line(line: int):
-	for i in range(10):
+	# 搬移 X=20 到 X=29
+	for i in range(OFFSET_X, 10 + OFFSET_X):
 		if line == 0:
 			set_cell(Vector2i(i, line), -1)
 		else:
 			var former_atlas = get_cell_atlas_coords(Vector2i(i, line - 1))
 			var former_source = get_cell_source_id(Vector2i(i, line - 1))
 			
-			# 如果上面是空的或者是幽靈，這一格就設為空
 			if former_source == -1 or former_source == ghost_source_id:
 				set_cell(Vector2i(i, line), -1)
 			else:
@@ -187,14 +193,14 @@ func _input(event):
 					spawn_block()
 				else:
 					shape_dir = 0
-					current_pos = Vector2i(4, -2)
+					# Hold 交換後重設位置 (加上 OFFSET_X)
+					current_pos = Vector2i(4 + OFFSET_X, -2)
 					last_actual_op = Action.NONE
 			KEY_Z when not event.echo:
 				counter_clockwise_rotate_block()
 
 # ==========================================
 # 移動與旋轉
-# 關鍵：順序必須是 擦幽靈 -> 擦本體 -> 移動 -> 畫幽靈 -> 畫本體
 # ==========================================
 
 func move_left():
@@ -332,14 +338,13 @@ func drop_block():
 	lock_counter = 60
 
 # ==========================================
-# 幽靈方塊 (Ghost ID = 0)
+# 幽靈方塊
 # ==========================================
 
 func erase_ghost():
 	set_ghost_block(current_piece, current_ghost_pos, -1)
 
 func update_ghost():
-	# 計算落點 (注意：check_collision 已經會忽略 ID 0 了)
 	var new_ghost_pos = current_pos
 	while true:
 		new_ghost_pos.y += 1
@@ -347,7 +352,6 @@ func update_ghost():
 			new_ghost_pos.y -= 1
 			break
 	
-	# 繪製 (使用 ID 0)
 	current_ghost_pos = new_ghost_pos
 	set_ghost_block(current_piece, current_ghost_pos, ghost_source_id)
 
@@ -355,13 +359,11 @@ func update_ghost():
 # 輔助函式 (Set Block)
 # ==========================================
 
-# 繪製本體 (ID = 1)
 func set_block(piece_array: Array, pos: Vector2i, id: int):
 	for block_pos in piece_array:
 		var final_pos = pos + block_pos
 		
 		if id == -1:
-			# 擦除時：只擦 ID 為 1 的，不要擦到幽靈 (ID 0)
 			if get_cell_source_id(final_pos) == source_id:
 				set_cell(final_pos, -1)
 		else:
@@ -384,17 +386,14 @@ func set_block(piece_array: Array, pos: Vector2i, id: int):
 					5: set_cell(final_pos, id, Vector2i(5, 0))
 					6: set_cell(final_pos, id, Vector2i(6, 0))
 
-# 繪製幽靈 (ID = 0)
 func set_ghost_block(piece_array: Array, pos: Vector2i, id: int):
 	for block_pos in piece_array:
 		var final_pos = pos + block_pos
 		
 		if id == -1:
-			# 擦除：只擦 ID 為 0 的
 			if get_cell_source_id(final_pos) == ghost_source_id:
 				set_cell(final_pos, -1)
 		else:
-			# 繪製：只畫在全空 (-1) 的位置，絕對不覆蓋本體 (ID 1)
 			if get_cell_source_id(final_pos) == -1:
 				set_cell(final_pos, id, ghost_atlas_coords)
 
@@ -404,20 +403,18 @@ func bag_randomnizer():
 		block_bag.shuffle()
 	return block_bag.pop_front()
 
-# 碰撞檢查：忽略 ID 0
+# 碰撞檢查：加上 OFFSET_X 的邊界判斷
 func check_collision(test_pos: Vector2i) -> bool:
 	var checker = false
 	for block_pos in current_piece:
 		var final_pos = test_pos + block_pos
 		
-		# 1. 邊界
-		if final_pos.x < 0 or final_pos.x >= 10 or final_pos.y >= 20:
+		# 邊界修改：左邊是 OFFSET_X，右邊是 10 + OFFSET_X
+		if final_pos.x < OFFSET_X or final_pos.x >= (10 + OFFSET_X) or final_pos.y >= 20:
 			return true
 			
-		# 2. 實體
 		var _id = get_cell_source_id(final_pos)
 		
-		# 關鍵：只要不是空(-1) 且 不是幽靈(0)，就代表撞到了
 		if _id != -1 and _id != ghost_source_id:
 			checker = true
 			
