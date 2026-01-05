@@ -64,24 +64,48 @@ physics_quadrant_size = 32
 navigation_enabled = false
 script = ExtResource("4_q5r2s")
 
-[node name="UI" type="CanvasLayer" parent="."]
-
-[node name="HostButton" type="Button" parent="UI"]
-offset_left = 1156.0
-offset_top = 12445.0
-offset_right = 5151.0
-offset_bottom = 15327.0
-theme_override_font_sizes/font_size = 1000
-text = "Host"
-
-[node name="JoinButton" type="Button" parent="UI"]
-offset_left = 23202.0
-offset_top = 12448.0
-offset_right = 27074.0
-offset_bottom = 15112.0
-theme_override_font_sizes/font_size = 1000
-text = "Join"
-
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(14217, 602)
 zoom = Vector2(0.023, 0.023)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="UI" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HostButton" type="Button" parent="CanvasLayer/UI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -7.0
+offset_top = -361.0
+offset_right = 506.0
+offset_bottom = 358.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 100
+text = "Host"
+
+[node name="JoinButton" type="Button" parent="CanvasLayer/UI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -553.0
+offset_top = -372.0
+offset_right = -6.5
+offset_bottom = 346.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 100
+text = "Join"

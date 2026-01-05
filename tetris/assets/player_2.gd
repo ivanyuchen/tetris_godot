@@ -175,29 +175,28 @@ func move_line(line: int):
 				set_cell(Vector2i(i, line), 1, former_atlas)
 
 func _input(event):
+	# ★ 關鍵檢查：我是否有權控制這個方塊？
+	# 如果我是 Host，我只能控制 P1；如果我是 Client，我只能控制 P2
+	if not is_multiplayer_authority():
+		return 
+
 	if event is InputEventKey and event.pressed:
 		match event.keycode:
+			# 改成呼叫 RPC，而不是直接執行函式
 			KEY_UP when not event.echo:
-				clockwise_rotate_block()
+				do_action.rpc("rotate_cw")
 			KEY_SPACE when not event.echo:
-				drop_block()
+				do_action.rpc("drop")
 			KEY_LEFT:
-				move_left()
+				do_action.rpc("move_left")
 			KEY_RIGHT:
-				move_right()
+				do_action.rpc("move_right")
 			KEY_DOWN:
-				move_down()
+				do_action.rpc("move_down")
 			KEY_C:
-				hold_block()
-				if shape_index == -1:
-					spawn_block()
-				else:
-					shape_dir = 0
-					# Hold 交換後重設位置 (加上 OFFSET_X)
-					current_pos = Vector2i(4 + OFFSET_X, -2)
-					last_actual_op = Action.NONE
+				do_action.rpc("hold")
 			KEY_Z when not event.echo:
-				counter_clockwise_rotate_block()
+				do_action.rpc("rotate_ccw")
 
 # ==========================================
 # 移動與旋轉
@@ -419,3 +418,37 @@ func check_collision(test_pos: Vector2i) -> bool:
 			checker = true
 			
 	return checker
+
+
+# @rpc("any_peer") 代表任何人都可以呼叫我
+# @rpc("call_local") 代表發送的人自己也會執行一次 (不用等網路由回傳)
+@rpc("any_peer", "call_local")
+func do_action(action_name: String):
+	# 收到信號了！執行原本的動作
+	match action_name:
+		"rotate_cw":
+			clockwise_rotate_block()
+		"rotate_ccw":
+			counter_clockwise_rotate_block()
+		"move_left":
+			move_left()
+		"move_right":
+			move_right()
+		"move_down":
+			move_down()
+		"drop":
+			drop_block()
+		"hold":
+			hold_block()
+			# 修正 Hold 邏輯：交換後如果需要重生，位置要對
+			if shape_index == -1:
+				spawn_block()
+			else:
+				shape_dir = 0
+				# 判斷我是 P1 (x=4) 還是 P2 (x=24)
+				# 這裡用一個簡單的方法判斷：看現在位置
+				if current_pos.x > 15: 
+					current_pos = Vector2i(24, -2)
+				else:
+					current_pos = Vector2i(4, -2)
+				last_actual_op = Action.NONE
